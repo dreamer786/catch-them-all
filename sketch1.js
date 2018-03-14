@@ -4,33 +4,60 @@ var player;
 var allPokeBalls = []; 
 var pokemon1 = [];
 var pokemonImage1;
-var allPokemon = [];
+var pokemonImage2;
+var allPokemon1 = [];//all level 1 pokemon (pikachu)
+var allPokemon2 = [];//level 2 pokemon - Charmander
 let attacks = [];
 var timer = 0;
 var gameState = "start";
 var score = 0;
+
 function preload(){
 	playerPic = loadImage("images/trainer1.png");
 	ball = loadImage("images/pokeball.png");
 	pokemonImage1 = loadImage("images/pikachu.png");
+	pokemonImage2 = loadImage("images/Charmander.png");
 }
 
-function setup(){
-	createCanvas(500,500);
-	background(0);
-
+function loadPokemon(level){
 	let startingXPos = 120;
 	let startingYPos = 125;
-	player = new Player();
 	for (let i = 0; i < 5; i ++){
 		for (let j = 0; j < 7; j++){
-			var pokemon = new Pokemon(startingXPos, startingYPos, 1);
-			allPokemon.push(pokemon);
+			if (level === 1){
+				var pokemon = new Pokemon(startingXPos, startingYPos, 1);
+				allPokemon1.push(pokemon);
+			}
+			else if (level === 2){
+				var pokemon = new Pokemon(startingXPos, startingYPos, 2);
+				allPokemon2.push(pokemon);
+			}
 			startingXPos += 40;	
 		}
 		startingXPos = 120;
 		startingYPos += 27;
 	}
+	
+}
+function setup(){
+	createCanvas(500,500);
+	background(0);
+	loadPokemon(1);
+	loadPokemon(2);
+	player = new Player();
+	/*
+	let startingXPos = 120;
+	let startingYPos = 125;
+	for (let i = 0; i < 5; i ++){
+		for (let j = 0; j < 7; j++){
+			var pokemon = new Pokemon(startingXPos, startingYPos, 1);
+			allPokemon1.push(pokemon);
+			startingXPos += 40;	
+		}
+		startingXPos = 120;
+		startingYPos += 27;
+	}
+	*/
 	imageMode(CENTER);
 
 }
@@ -51,14 +78,40 @@ function draw(){
 	else{
 		gameEnd();
 	}
-	
-
 }
 function gameEnd(){
 	textSize(40);
 	text("GAME OVER", 200, 200);
 	text("Score: ", 200, 240);
-	text(score, 200, 280);
+	text(score, 240, 240);
+}
+function playLevel(level){
+	if (level === 1){
+		allPokemon1.forEach(function(pokemon){
+			pokemon.display();
+			pokemon.checkHits();
+		});
+		for(let i = 0; i < allPokemon1.length; i ++){
+			if (allPokemon1[i].numHits === allPokemon1[i].level){
+				allPokemon1.splice(i,1);
+				score += 1;
+				i --;
+			}
+		}
+	}
+	else if (level === 2){
+		allPokemon2.forEach(function(pokemon){
+			pokemon.display();
+			pokemon.checkHits();
+		});
+		for(let i = 0; i < allPokemon2.length; i ++){
+			if (allPokemon2[i].numHits === allPokemon2[i].level){
+				allPokemon2.splice(i,1);
+				score += 1;
+				i --;
+			}
+		}
+	}
 
 }
 function gamePlay(){
@@ -68,20 +121,27 @@ function gamePlay(){
 	player.display();
 	player.move();
 	player.checkHits();
-	//console.log("num pokemon: ", allPokemon.length);
-	allPokemon.forEach(function(pokemon){
-		//console.log("position: " ,pokemon.x, pokemon.y);
-		/*if (timer < 500){
+	if (allPokemon1.length > 0){
+		playLevel(1);
+	}
+	else{
+		playLevel(2);
+	}
+	/*
+	allPokemon1.forEach(function(pokemon){
+		//comment this out
+		if (timer < 500){
 			timer += 1;
 		}
 		if (timer === 500){
 			pokemon.move();
 			timer = 0;
 		}
-		*/
+		
 		pokemon.display();
 		pokemon.checkHits();
-	})
+	});
+	*/
 	// removing balls that have gone out of bounds
 	for(let i = 0; i < allPokeBalls.length; i ++){
 		if (allPokeBalls[i].yPos <= 0){
@@ -92,14 +152,17 @@ function gamePlay(){
 			allPokeBalls[i].moveAndDisplay();
 		}
 	}	
+	/*
 	//removing pokemon that have been hit enough times
-	for(let i = 0; i < allPokemon.length; i ++){
-		if (allPokemon[i].numHits === allPokemon[i].level){
-			allPokemon.splice(i,1);
+	for(let i = 0; i < allPokemon1.length; i ++){
+		if (allPokemon1[i].numHits === allPokemon1[i].level){
+			allPokemon1.splice(i,1);
 			score += 1;
 			i --;
 		}
 	}
+	*/
+	//removing attacks that hit the player
 	for(let i = 0; i < attacks.length; i++){
         if(attacks[i].y > 500 || dist(attacks[i].x, attacks[i].y, player.xPos, player.yPos) < 25 ){
             attacks.splice(i,1);
@@ -183,6 +246,9 @@ class Pokemon {
 		if (this.level === 1){
 			image(pokemonImage1, this.x, this.y, 40, 50);
 		}
+		else if (this.level === 2){
+			image(pokemonImage2, this.x, this.y, 40, 50);
+		}
 		let test = Math.floor(random(600));
 		if( test == 333 ){
             this.attack();
@@ -236,4 +302,3 @@ class Attack {
         this.y += this.ySpeed;
     }
 }
-
