@@ -1,4 +1,3 @@
-
 var playerPic;
 var player;
 var allPokeBalls = []; 
@@ -45,19 +44,6 @@ function setup(){
 	loadPokemon(1);
 	loadPokemon(2);
 	player = new Player();
-	/*
-	let startingXPos = 120;
-	let startingYPos = 125;
-	for (let i = 0; i < 5; i ++){
-		for (let j = 0; j < 7; j++){
-			var pokemon = new Pokemon(startingXPos, startingYPos, 1);
-			allPokemon1.push(pokemon);
-			startingXPos += 40;	
-		}
-		startingXPos = 120;
-		startingYPos += 27;
-	}
-	*/
 	imageMode(CENTER);
 
 }
@@ -67,9 +53,6 @@ function keyPressed(){
 		player.throwBall();
 	}
 }
-
-
-
 function draw(){
 	background(0);
 	if (gameState === "start"){
@@ -83,12 +66,13 @@ function gameEnd(){
 	textSize(40);
 	text("GAME OVER", 200, 200);
 	text("Score: ", 200, 240);
-	text(score, 240, 240);
+	text(score, 340, 240);
 }
 function playLevel(level){
 	if (level === 1){
 		allPokemon1.forEach(function(pokemon){
 			pokemon.display();
+			//pokemon.move();
 			pokemon.checkHits();
 		});
 		for(let i = 0; i < allPokemon1.length; i ++){
@@ -115,9 +99,12 @@ function playLevel(level){
 
 }
 function gamePlay(){
-	textSize(40);
-	text('Number of Hits to Player', 10, 30);
-	text(player.numHits, 10, 70);
+	textSize(20);
+	fill(200,200,200);
+	text('Invader Score', 10, 30);
+	text(player.numHits, 10, 50);
+	text('Player Score', 370, 30);
+	text(score, 400, 50);
 	player.display();
 	player.move();
 	player.checkHits();
@@ -152,16 +139,7 @@ function gamePlay(){
 			allPokeBalls[i].moveAndDisplay();
 		}
 	}	
-	/*
-	//removing pokemon that have been hit enough times
-	for(let i = 0; i < allPokemon1.length; i ++){
-		if (allPokemon1[i].numHits === allPokemon1[i].level){
-			allPokemon1.splice(i,1);
-			score += 1;
-			i --;
-		}
-	}
-	*/
+	
 	//removing attacks that hit the player
 	for(let i = 0; i < attacks.length; i++){
         if(attacks[i].y > 500 || dist(attacks[i].x, attacks[i].y, player.xPos, player.yPos) < 25 ){
@@ -247,6 +225,7 @@ class Pokemon {
 			image(pokemonImage1, this.x, this.y, 40, 50);
 		}
 		else if (this.level === 2){
+			player.numHits = 0;//reset 
 			image(pokemonImage2, this.x, this.y, 40, 50);
 		}
 		let test = Math.floor(random(600));
@@ -256,24 +235,38 @@ class Pokemon {
 
 
 	}
-	//move right, then down, then left
+	//level 3 pokemon moves depending on players move
 	move(){
+		if (this.x < player.xPos){
+			this.x += 3;
+		}
+		else{
+			this.x -= 3;
+		}
+		if (this.y < player.xPos){
+			this.y += 3;
+		}
+		else{
+			this.y -= 3;
+		}
+		/*
 		//move right
 		if (this.numRight < 3){
-			this.x += 20;
+			this.x += 40;
 			this.numRight += 1;
 		}
 		else if (this.numRight === 3){
-			this.y += 25;
+			this.y += 50;
 		}
 		if (this.numRight === 3 && this.numLeft < 3){
-			this.x -= 20;
+			this.x -= 40;
 			this.numLeft += 1;
 		}
 		if (this.numRight === 3 && this.numLeft === 3){
 			this.numRight = 0;
 			this.numLeft = 0;
 		}
+		*/
 	}
 	
 	checkHits(){
@@ -302,3 +295,4 @@ class Attack {
         this.y += this.ySpeed;
     }
 }
+
