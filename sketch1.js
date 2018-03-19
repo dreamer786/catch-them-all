@@ -4,8 +4,11 @@ var allPokeBalls = [];
 var pokemon1 = [];
 var pokemonImage1;
 var pokemonImage2;
+var lugiaLeft;
+var lugiaRight;
 var allPokemon1 = [];//all level 1 pokemon (pikachu)
 var allPokemon2 = [];//level 2 pokemon - Charmander
+var lugia;
 let attacks = [];
 var timer = 0;
 var gameState = "start";
@@ -16,26 +19,34 @@ function preload(){
 	ball = loadImage("images/pokeball.png");
 	pokemonImage1 = loadImage("images/pikachu.png");
 	pokemonImage2 = loadImage("images/Charmander.png");
+	lugiaLeft = loadImage("images/lugialeft.png");
+	lugiaRight = loadImage("images/lugiaright.png");
 }
-
+//PROBLEMS: INVADER SCORE DOES NOT UPDATE FOR LEVEL 2	
 function loadPokemon(level){
 	let startingXPos = 120;
 	let startingYPos = 125;
-	for (let i = 0; i < 5; i ++){
-		for (let j = 0; j < 7; j++){
-			if (level === 1){
-				var pokemon = new Pokemon(startingXPos, startingYPos, 1);
-				allPokemon1.push(pokemon);
-			}
-			else if (level === 2){
-				var pokemon = new Pokemon(startingXPos, startingYPos, 2);
-				allPokemon2.push(pokemon);
-			}
-			startingXPos += 40;	
-		}
-		startingXPos = 120;
-		startingYPos += 27;
+	if (level === 3){
+		lugia = new Pokemon(200,200,3);
 	}
+	else{
+		for (let i = 0; i < 5; i ++){
+			for (let j = 0; j < 7; j++){
+				if (level === 1){
+					var pokemon = new Pokemon(startingXPos, startingYPos, 1);
+					allPokemon1.push(pokemon);
+				}
+				else if (level === 2){
+					var pokemon = new Pokemon(startingXPos, startingYPos, 2);
+					allPokemon2.push(pokemon);
+				}
+				startingXPos += 40;	
+			}
+			startingXPos = 120;
+			startingYPos += 27;
+		}
+	}
+	
 	
 }
 function setup(){
@@ -84,6 +95,7 @@ function playLevel(level){
 		}
 	}
 	else if (level === 2){
+
 		allPokemon2.forEach(function(pokemon){
 			pokemon.display();
 			pokemon.checkHits();
@@ -95,6 +107,10 @@ function playLevel(level){
 				i --;
 			}
 		}
+	}
+	else {
+		lugia.moveAndDisplay();
+		lugia.checkHits();
 	}
 
 }
@@ -111,24 +127,13 @@ function gamePlay(){
 	if (allPokemon1.length > 0){
 		playLevel(1);
 	}
-	else{
+	else if (allPokemon1.length == 0){
 		playLevel(2);
 	}
-	/*
-	allPokemon1.forEach(function(pokemon){
-		//comment this out
-		if (timer < 500){
-			timer += 1;
-		}
-		if (timer === 500){
-			pokemon.move();
-			timer = 0;
-		}
-		
-		pokemon.display();
-		pokemon.checkHits();
-	});
-	*/
+	else if (allPokemon2.length === 0){
+		playLevel(3);
+	}
+	
 	// removing balls that have gone out of bounds
 	for(let i = 0; i < allPokeBalls.length; i ++){
 		if (allPokeBalls[i].yPos <= 0){
@@ -152,7 +157,7 @@ function gamePlay(){
         }
     }
 
-    if (player.numHits === 10){
+    if (player.numHits === 20){
     	gameState = "end";
     }
 }
@@ -225,57 +230,57 @@ class Pokemon {
 			image(pokemonImage1, this.x, this.y, 40, 50);
 		}
 		else if (this.level === 2){
-			player.numHits = 0;//reset 
 			image(pokemonImage2, this.x, this.y, 40, 50);
 		}
 		let test = Math.floor(random(600));
-		if( test == 333 ){
+		if (test == 333){
             this.attack();
         }
 
 
 	}
 	//level 3 pokemon moves depending on players move
-	move(){
-		if (this.x < player.xPos){
-			this.x += 3;
-		}
-		else{
-			this.x -= 3;
-		}
+	moveAndDisplay(){
 		if (this.y < player.xPos){
 			this.y += 3;
 		}
 		else{
 			this.y -= 3;
 		}
-		/*
-		//move right
-		if (this.numRight < 3){
-			this.x += 40;
-			this.numRight += 1;
+		// go right
+		if (this.x < player.xPos){
+			this.x += 3;
+			image(lugiaright, this.x, this.y, 90, 90);
 		}
-		else if (this.numRight === 3){
-			this.y += 50;
+		//go left
+		else{
+			this.x -= 3;
+			image(lugiaLeft, this.x, this.y, 90, 90);
 		}
-		if (this.numRight === 3 && this.numLeft < 3){
-			this.x -= 40;
-			this.numLeft += 1;
-		}
-		if (this.numRight === 3 && this.numLeft === 3){
-			this.numRight = 0;
-			this.numLeft = 0;
-		}
-		*/
+		let test = Math.floor(random(600));
+		if (test == 333){
+            this.attack();
+        }
+		
 	}
 	
 	checkHits(){
 		for(let i = 0; i < allPokeBalls.length; i ++){
-			if (dist(allPokeBalls[i].xPos, allPokeBalls[i].yPos, this.x, this.y) < 30){
-				this.numHits += 1;
-				allPokeBalls.splice(i, 1);
-				i --;
+			if (this.level === 3){
+				if (dist(allPokeBalls[i].xPos, allPokeBalls[i].yPos, this.x, this.y) <= 53){
+					this.numHits += 1;
+					allPokeBalls.splice(i, 1);
+					i --;
+				}
 			}
+			else{
+				if (dist(allPokeBalls[i].xPos, allPokeBalls[i].yPos, this.x, this.y) < 30){
+					this.numHits += 1;
+					allPokeBalls.splice(i, 1);
+					i --;
+				}
+			}
+			
 		}
 	}
 	attack(){
@@ -295,4 +300,3 @@ class Attack {
         this.y += this.ySpeed;
     }
 }
-
