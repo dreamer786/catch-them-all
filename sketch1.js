@@ -6,8 +6,12 @@ var pokemonImage1;
 var pokemonImage2;
 var lugiaLeft;
 var lugiaRight;
+var allPokemon = [];
+var gameLevel = 1;
+/*
 var allPokemon1 = [];//all level 1 pokemon (pikachu)
 var allPokemon2 = [];//level 2 pokemon - Charmander
+*/
 var lugia;
 let attacks = [];
 var timer = 0;
@@ -18,7 +22,7 @@ function preload(){
 	playerPic = loadImage("images/trainer1.png");
 	ball = loadImage("images/pokeball.png");
 	pokemonImage1 = loadImage("images/pikachu.png");
-	pokemonImage2 = loadImage("images/Charmander.png");
+	pokemonImage2 = loadImage("images/pokemonSprites/charmander.png");
 	lugiaLeft = loadImage("images/lugialeft.png");
 	lugiaRight = loadImage("images/lugiaright.png");
 }
@@ -34,11 +38,11 @@ function loadPokemon(level){
 			for (let j = 0; j < 7; j++){
 				if (level === 1){
 					var pokemon = new Pokemon(startingXPos, startingYPos, 1);
-					allPokemon1.push(pokemon);
+					allPokemon.push(pokemon);
 				}
 				else if (level === 2){
 					var pokemon = new Pokemon(startingXPos, startingYPos, 2);
-					allPokemon2.push(pokemon);
+					allPokemon.push(pokemon);
 				}
 				startingXPos += 40;	
 			}
@@ -52,8 +56,12 @@ function loadPokemon(level){
 function setup(){
 	createCanvas(500,500);
 	background(0);
+	loadPokemon(gameLevel);
+	/*
 	loadPokemon(1);
 	loadPokemon(2);
+	loadPokemon(3);
+	*/
 	player = new Player();
 	imageMode(CENTER);
 
@@ -81,14 +89,14 @@ function gameEnd(){
 }
 function playLevel(level){
 	if (level === 1){
-		allPokemon1.forEach(function(pokemon){
+		allPokemon.forEach(function(pokemon){
 			pokemon.display();
 			//pokemon.move();
 			pokemon.checkHits();
 		});
-		for(let i = 0; i < allPokemon1.length; i ++){
-			if (allPokemon1[i].numHits === allPokemon1[i].level){
-				allPokemon1.splice(i,1);
+		for(let i = 0; i < allPokemon.length; i ++){
+			if (allPokemon[i].numHits >= allPokemon[i].level){
+				allPokemon.splice(i,1);
 				score += 1;
 				i --;
 			}
@@ -96,13 +104,13 @@ function playLevel(level){
 	}
 	else if (level === 2){
 
-		allPokemon2.forEach(function(pokemon){
+		allPokemon.forEach(function(pokemon){
 			pokemon.display();
 			pokemon.checkHits();
 		});
-		for(let i = 0; i < allPokemon2.length; i ++){
-			if (allPokemon2[i].numHits === allPokemon2[i].level){
-				allPokemon2.splice(i,1);
+		for(let i = 0; i < allPokemon.length; i ++){
+			if (allPokemon[i].numHits >= allPokemon[i].level){
+				allPokemon.splice(i,1);
 				score += 1;
 				i --;
 			}
@@ -124,15 +132,26 @@ function gamePlay(){
 	player.display();
 	player.move();
 	player.checkHits();
-	if (allPokemon1.length > 0){
+
+
+	if (allPokemon.length <=0 ){
+		gameLevel++;
+		loadPokemon(gameLevel);
+	}
+	playLevel(gameLevel);
+
+	// HEREEEEEEEEEE
+	/*
+	if (allPokemon.length > 0){
 		playLevel(1);
 	}
-	else if (allPokemon1.length == 0){
+	else if (allPokemon1.length === 0){
 		playLevel(2);
 	}
 	else if (allPokemon2.length === 0){
 		playLevel(3);
 	}
+	*/
 	
 	// removing balls that have gone out of bounds
 	for(let i = 0; i < allPokeBalls.length; i ++){
@@ -224,6 +243,10 @@ class Pokemon {
 		this.numHits = 0;
 		this.numRight = 0;//how many times the pokemon moved right
 		this.numLeft = 0;//how many times the pokemon moved left
+
+		//POINT B:
+		
+
 	}
 	display(){
 		if (this.level === 1){
@@ -241,22 +264,28 @@ class Pokemon {
 	}
 	//level 3 pokemon moves depending on players move
 	moveAndDisplay(){
+		// randomly move up and down, keep reassigning new end points (yPos)
 		if (this.y < player.xPos){
 			this.y += 3;
 		}
 		else{
 			this.y -= 3;
 		}
+
 		// go right
 		if (this.x < player.xPos){
 			this.x += 3;
-			image(lugiaright, this.x, this.y, 90, 90);
+			image(lugiaRight, this.x, this.y, 90, 90);
 		}
 		//go left
+		else if (this.x === player.xPos){
+			this.y -= 3;
+		}
 		else{
 			this.x -= 3;
 			image(lugiaLeft, this.x, this.y, 90, 90);
 		}
+
 		let test = Math.floor(random(600));
 		if (test == 333){
             this.attack();
